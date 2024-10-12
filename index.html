@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/1.0.11/pako.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+
+</head>
+
+<body>
+    <div id="mermaidOutput"></div>
+    <script>
+        mermaid.initialize({ startOnLoad: false });
+        async function renderMermaid(input) {
+            const outputDiv = document.getElementById('mermaidOutput');
+            outputDiv.innerHTML = '';
+
+            try {
+                const { svg } = await mermaid.render('mermaidSvg', input);
+                outputDiv.innerHTML = svg;
+            } catch (error) {
+                console.error('Mermaid rendering failed:', error);
+                outputDiv.textContent = 'Error rendering diagram';
+            }
+        }
+
+
+        function encode(str) {
+            try {
+                return encodeURIComponent(btoa(pako.deflate(str, { to: 'string' })));
+            } catch (e) {
+                return str;
+            }
+        }
+        function decode(str) {
+            try {
+                return pako.inflate((atob(decodeURIComponent(str))), { to: 'string' });
+            } catch (e) {
+                return str;
+            }
+        }
+        // 获取当前页面的URL
+        const url = new URL(window.location.href);
+
+        // 从URL中获取'data'参数
+        const encodedData = url.searchParams.get('data');
+
+        if (encodedData) {
+            try {
+                // 使用base64解码
+                const decodedData = decode(encodedData);
+                console.log('解码后的数据:', decodedData);
+                renderMermaid(decodedData)
+            } catch (error) {
+                console.error('解码失败:', error);
+            }
+        } else {
+            console.log('URL中没有data参数');
+        }
+    </script>
+</body>
+
+</html>
